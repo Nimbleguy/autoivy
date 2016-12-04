@@ -1,5 +1,6 @@
 JAR := jar.jar# Your jar file, with the .jar.
 ARGS := # Arguments for your jar file when running.
+PROP := # System properties when launching the jar.
 SRCDIR := src# Directory where your .java files are. No trailing /.
 BINDIR := bin# Directory where your .class files should be. No trailing /.
 LIBDIR := lib# Where you want your libraries. No trailing /.
@@ -50,7 +51,7 @@ $(BINDIR)/%.class : $(SRCDIR)/%.java $(SRCDIR) $(BINDIR) $(ARTIFACTS)
 	javac -d $(BINDIR) -cp ".:$(LIBDIR)/*:$(BINDIR):$(SRCDIR)" $<
 
 run : $(JAR)
-	java -jar $(JAR) $(ARGS)
+	java $(PROP) -jar $(JAR) $(ARGS)
 
 debug : build
 	java -Xdebug -Xnoagent -Djava.compiler=NONE  -Xrunjdwp:transport=dt_socket,server=y,address=8888,suspend=y -cp ".:$(LIBDIR)/*" $(subst .jar,,$(JAR)) $(ARGS)
