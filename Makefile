@@ -4,6 +4,7 @@ PROP := # System properties when launching the jar.
 SRCDIR := src# Directory where your .java files are. No trailing /.
 BINDIR := bin# Directory where your .class files should be. No trailing /.
 LIBDIR := lib# Where you want your libraries. No trailing /.
+JARDIR := # Set this to a directory if you want to add external jars. No trailing /.
 MANIFEST := $(SRCDIR)/MANIFEST.MF# Your manifest file.
 
 # Don't change stuff after here.
@@ -44,11 +45,11 @@ ivy.jar :
 $(JAR) : $(ARTIFACTS) $(CFILE) $(MANIFEST)
 	cp $(MANIFEST) $(BINDIR)/manifest
 	truncate -s-1 $(BINDIR)/manifest
-	printf "Class-Path: $(subst $(SPACE),$(SPACE)\n$(SPACE),$(wildcard $(LIBDIR)/*.jar))\n" >> $(BINDIR)/manifest
+	printf "Class-Path: $(subst $(SPACE),$(SPACE)\n$(SPACE),$(wildcard $(LIBDIR)/*.jar))$(subst $(SPACE),$(SPACE)\n$(SPACE),$(wildcard $(JARDIR)/*.jar))\n" >> $(BINDIR)/manifest
 	jar cmf $(BINDIR)/manifest $(JAR) $(patsubst $(BINDIR)/%,-C $(BINDIR) %,$(CFILE))
 
 $(BINDIR)/%.class : $(SRCDIR)/%.java $(SRCDIR) $(BINDIR) $(ARTIFACTS)
-	javac -d $(BINDIR) -cp ".:$(LIBDIR)/*:$(BINDIR):$(SRCDIR)" $<
+	javac -d $(BINDIR) -cp ".:$(LIBDIR)/*:$(JARDIR):$(BINDIR):$(SRCDIR)" $<
 
 run : $(JAR)
 	java $(PROP) -jar $(JAR) $(ARGS)
