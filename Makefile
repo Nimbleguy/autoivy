@@ -47,7 +47,7 @@ $(BINDIR)/%.class : $(SRCDIR)/%.java $(SRCDIR) $(BINDIR)
 	javac -d $(BINDIR) -cp ".:$(LIBDIR)/*:$(BINDIR):$(SRCDIR)" $<
 
 run : $(JAR)
-	java -cp ".:libs/*:$(SRCDIR):$(BINDIR)" -jar $(JAR) $(ARGS)
+	java -cp ".:$(LIBDIR)/*:$(SRCDIR):$(BINDIR)" -jar $(JAR) $(ARGS)
 
 debug : build
 	java -Xdebug -Xnoagent -Djava.compiler=NONE  -Xrunjdwp:transport=dt_socket,server=y,address=8888,suspend=y -cp ".:$(LIBDIR)/*" $(subst .jar,,$(JAR)) $(ARGS)
