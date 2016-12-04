@@ -41,13 +41,16 @@ ivy.jar :
 	rm -rf apache-ivy-2.4.0 apache-ivy-2.4.0-bin.zip
 
 $(JAR) : $(ARTIFACTS) $(CFILE) $(MANIFEST)
-	jar cmf $(MANIFEST) $(JAR) $(patsubst $(BINDIR)/%,-C $(BINDIR) %,$(CFILE))
+	cp $(MANIFEST) $(BINDIR)/manifest
+	truncate -s-1 $(BINDIR)/manifest
+	printf "Class-Path: $(subst $(SPACE),$(SPACE)\n$(SPACE),$(wildcard $(LIBDIR)/*.jar))\n" >> $(BINDIR)/manifest
+	jar cmf $(BINDIR)/manifest $(JAR) $(patsubst $(BINDIR)/%,-C $(BINDIR) %,$(CFILE))
 
-$(BINDIR)/%.class : $(SRCDIR)/%.java $(SRCDIR) $(BINDIR)
+$(BINDIR)/%.class : $(SRCDIR)/%.java $(SRCDIR) $(BINDIR) $(ARTIFACTS)
 	javac -d $(BINDIR) -cp ".:$(LIBDIR)/*:$(BINDIR):$(SRCDIR)" $<
 
 run : $(JAR)
-	java -cp ".:$(LIBDIR)/*:$(SRCDIR):$(BINDIR)" -jar $(JAR) $(ARGS)
+	java -jar $(JAR) $(ARGS)
 
 debug : build
 	java -Xdebug -Xnoagent -Djava.compiler=NONE  -Xrunjdwp:transport=dt_socket,server=y,address=8888,suspend=y -cp ".:$(LIBDIR)/*" $(subst .jar,,$(JAR)) $(ARGS)
