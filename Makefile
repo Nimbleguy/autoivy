@@ -32,7 +32,7 @@ $(LIBDIR) :
 	-mkdir $(LIBDIR)
 
 $(ARTIFACTS) : $(LIBDIR) ivysettings.xml ivy.jar $(LIBS)
-	if [ ! -e "$@" ]; then java -jar ivy.jar -retrieve "$@(-[classifier])" -dependency $(subst $(SEP),$(SPACE),$(subst $(LIBDIR)/,,$@)) -settings ivysettings.xml; fi
+	if [ ! -e "$@" ]; then java -jar ivy.jar -retrieve "$(LIBDIR)/[artifact](-[revision])(-[classifier]).[ext]" -dependency $(subst $(SEP),$(SPACE),$(patsubst $(LIBDIR)/%,%,$@)) -settings ivysettings.xml && touch $@; fi
 
 ivy.jar :
 	wget http://archive.apache.org/dist/ant/ivy/2.4.0/apache-ivy-2.4.0-bin.zip
@@ -44,10 +44,10 @@ $(JAR) : $(ARTIFACTS) $(CFILE) $(MANIFEST)
 	jar cmf $(MANIFEST) $(JAR) $(patsubst $(BINDIR)/%,-C $(BINDIR) %,$(CFILE))
 
 $(BINDIR)/%.class : $(SRCDIR)/%.java $(SRCDIR) $(BINDIR)
-	javac -d $(BINDIR) -cp ".:$(LIBDIR)/*" $^
+	javac -d $(BINDIR) -cp ".:$(LIBDIR)/*:$(BINDIR):$(SRCDIR)" $<
 
 run : $(JAR)
-	java -cp ".:libs/*" -jar $(JAR) $(ARGS)
+	java -cp ".:libs/*:$(SRCDIR):$(BINDIR)" -jar $(JAR) $(ARGS)
 
 debug : build
 	java -Xdebug -Xnoagent -Djava.compiler=NONE  -Xrunjdwp:transport=dt_socket,server=y,address=8888,suspend=y -cp ".:$(LIBDIR)/*" $(subst .jar,,$(JAR)) $(ARGS)
