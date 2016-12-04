@@ -11,7 +11,7 @@ JFILE := $(shell find $(SRCDIR) -name "*.java")
 CFILE := $(patsubst $(SRCDIR)/%.java,$(BINDIR)/%.class,$(JFILE))
 EMPTY :=
 SPACE := $(EMPTY) $(EMPTY)
-SEP := ?
+SEP := $$
 ARTIFACTS := $(patsubst %,$(LIBDIR)/%,$(shell cat $(LIBS)))
 
 
