@@ -1,5 +1,6 @@
 JAR := jar.jar# Your jar file, with the .jar.
 ARGS := # Arguments for your jar file when running.
+CARG := # Arguments for javac. When debugging, use -g for local var debug ability.
 PROP := # System properties when launching the jar.
 SRCDIR := src# Directory where your .java files are. No trailing /.
 BINDIR := bin# Directory where your .class files should be. No trailing /.
@@ -49,13 +50,13 @@ $(JAR) : $(ARTIFACTS) $(CFILE) $(MANIFEST)
 	jar cmf $(BINDIR)/manifest $(JAR) $(patsubst $(BINDIR)/%,-C $(BINDIR) %,$(CFILE))
 
 $(BINDIR)/%.class : $(SRCDIR)/%.java $(SRCDIR) $(BINDIR) $(ARTIFACTS)
-	javac -d $(BINDIR) -cp ".:$(LIBDIR)/*:$(JARDIR):$(BINDIR):$(SRCDIR)" $<
+	javac -d $(BINDIR) -cp ".:$(LIBDIR)/*:$(JARDIR):$(BINDIR):$(SRCDIR)" $(CARG) $<
 
 run : $(JAR)
 	java $(PROP) -jar $(JAR) $(ARGS)
 
 debug : build
-	java -Xdebug -Xnoagent -Djava.compiler=NONE  -Xrunjdwp:transport=dt_socket,server=y,address=8888,suspend=y -cp ".:$(LIBDIR)/*" $(subst .jar,,$(JAR)) $(ARGS)
+	java -Xdebug -Xnoagent -Djava.compiler=NONE  -Xrunjdwp:transport=dt_socket,server=y,address=8888,suspend=y $(PROP) $(JAR) $(ARGS)
 
 jdb :
 	jdb -attach localhost:8888
